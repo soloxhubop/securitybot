@@ -4,6 +4,7 @@ from discord.ext import commands
 from discord import ui
 
 # --- CONFIGURAZIONE ---
+# Assicurati di aver impostato la variabile 'TOKEN' nelle impostazioni di Render
 TOKEN = os.environ.get('TOKEN')
 MIO_ID = 123456789012345678  # <--- METTI IL TUO ID QUI!
 
@@ -36,19 +37,19 @@ async def setup(ctx):
 # --- LOGICA DI SICUREZZA ---
 @bot.event
 async def on_message(message):
-    if message.author.bot or message.author.id == MIO_ID:
+    if message.author.bot:
+        return
+    
+    # Controllo comandi
+    if message.content.startswith("?"):
         await bot.process_commands(message)
         return
 
     # Anti-Link
     if config["link"] and "http" in message.content.lower():
-        await message.delete()
-        await message.channel.send(f"🚫 {message.author.mention}, link non permessi!")
-
-    # Anti-Spam (semplificato)
-    if config["spam"]:
-        # Qui potresti aggiungere un contatore basato su tempo
-        pass 
+        if message.author.id != MIO_ID:
+            await message.delete()
+            await message.channel.send(f"🚫 {message.author.mention}, link non permessi!")
 
     await bot.process_commands(message)
 
